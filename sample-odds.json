@@ -1,0 +1,83 @@
+[
+  {
+    "id": "match1",
+    "home_team": "Equipo A",
+    "away_team": "Equipo B",
+    "commence_time": "2024-05-29T12:00:00Z",
+    "bookmakers": [
+      {
+        "title": "Casa1",
+        "markets": [
+          {
+            "key": "h2h",
+            "outcomes": [
+              { "name": "Equipo A", "price": 2.5 },
+              { "name": "Draw", "price": 3.2 },
+              { "name": "Equipo B", "price": 3.3 }
+            ]
+          }
+        ]
+      },
+      {
+        "title": "Casa2",
+        "markets": [
+          {
+            "key": "h2h",
+            "outcomes": [
+              { "name": "Equipo A", "price": 2.4 },
+              { "name": "Draw", "price": 3.6 },
+              { "name": "Equipo B", "price": 3.2 }
+            ]
+          }
+        ]
+      },
+      {
+        "title": "Casa3",
+        "markets": [
+          {
+            "key": "h2h",
+            "outcomes": [
+              { "name": "Equipo A", "price": 2.3 },
+              { "name": "Draw", "price": 3.4 },
+              { "name": "Equipo B", "price": 3.75 }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "match2",
+    "home_team": "Equipo C",
+    "away_team": "Equipo D",
+    "commence_time": "2024-05-29T15:00:00Z",
+    "bookmakers": [
+      {
+        "title": "Casa1",
+        "markets": [
+          {
+            "key": "h2h",
+            "outcomes": [
+              { "name": "Equipo C", "price": 1.8 },
+              { "name": "Draw", "price": 3.0 },
+              { "name": "Equipo D", "price": 4.0 }
+            ]
+          }
+        ]
+      },
+      {
+        "title": "Casa2",
+        "markets": [
+          {
+            "key": "h2h",
+            "outcomes": [
+              { "name": "Equipo C", "price": 1.9 },
+              { "name": "Draw", "price": 3.1 },
+              { "name": "Equipo D", "price": 3.9 }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+]

@@ -1,0 +1,13 @@
+{
+  "name": "arbitraje",
+  "version": "1.0.0",
+  "description": "Calculadora de arbitraje con datos en vivo",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "test": "node -e \"console.log('no tests')\""
+  },
+  "dependencies": {
+    "express": "^4.19.2"
+  }
+}
