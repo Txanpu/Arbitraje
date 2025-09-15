@@ -89,9 +89,12 @@
     const fmt = (n) => isFinite(n) ? Number(n).toFixed(2) : '—';
     const fmtPct = (n) => isFinite(n) ? (n * 100).toFixed(2) + '%' : '—';
 
-    function setProbability(el, odd) {
-      const prob = odd > 0 ? 1 / odd : NaN;
+    function setProbability(el, prob) {
       $(el).textContent = fmtPct(prob);
+    }
+
+    function resetProbabilities() {
+      ['pa', 'px', 'pb'].forEach(id => setProbability(id, NaN));
     }
 
     function calc() {
@@ -99,11 +102,8 @@
       const ox = parseFloat($('ox').value);
       const ob = parseFloat($('ob').value);
 
-      setProbability('pa', oa);
-      setProbability('px', ox);
-      setProbability('pb', ob);
-
       if (![oa, ox, ob].every(v => v && v > 1)) {
+        resetProbabilities();
         $('result').style.display = 'none';
         return;
       }
@@ -111,6 +111,10 @@
       const invA = 1 / oa, invX = 1 / ox, invB = 1 / ob;
       const invSum = invA + invX + invB;
       const margin = 1 - invSum; // >0 si hay arbitraje
+
+      setProbability('pa', invA / invSum);
+      setProbability('px', invX / invSum);
+      setProbability('pb', invB / invSum);
 
       let sA = BANK * invA / invSum;
       let sX = BANK * invX / invSum;
