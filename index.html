@@ -11,6 +11,7 @@
     .card{background:#111827;border:1px solid #2a2f3a;border-radius:var(--radius);padding:16px;max-width:760px;margin-bottom:24px}
     .grid{display:grid;gap:var(--gap)}
     .g3{grid-template-columns:repeat(3,1fr)}
+    .g2{grid-template-columns:repeat(2,1fr)}
     label{display:flex;justify-content:space-between;align-items:center;gap:8px;font-size:12px;opacity:.8}
     input[type="number"]{width:100%;padding:10px;border-radius:10px;border:1px solid #2a2f3a;background:#0e1525;color:#e6e6e6}
     .muted{opacity:.75;font-size:12px}
@@ -83,6 +84,57 @@
     <div class="muted">Nota: si 1/oa + 1/ox + 1/ob < 1, hay arbitraje y el beneficio es positivo. Sin comisiones ni límites.</div>
   </div>
 
+  <div class="card grid" id="app12">
+    <h1>Arbitraje 1/2</h1>
+    <div class="muted">Banca fija: <b>100,00 €</b>. Introduce cuotas decimales.</div>
+
+    <div class="grid g2">
+      <div>
+        <label>Cuota Gana A <span class="prob" id="pa12">—</span></label>
+        <input id="oa12" type="number" step="0.01" min="1.01" placeholder="1.95">
+      </div>
+      <div>
+        <label>Cuota Gana B <span class="prob" id="pb12">—</span></label>
+        <input id="ob12" type="number" step="0.01" min="1.01" placeholder="1.95">
+      </div>
+    </div>
+
+    <div id="result12" class="grid" style="display:none">
+      <div id="arbFlag12" class="mono"></div>
+
+      <div class="box grid g2">
+        <div>
+          <div class="muted">Apostar A</div>
+          <div class="mono" id="sa12">–</div>
+        </div>
+        <div>
+          <div class="muted">Apostar B</div>
+          <div class="mono" id="sb12">–</div>
+        </div>
+      </div>
+
+      <div class="grid g3">
+        <div>
+          <div class="muted">Payout igualado (teórico)</div>
+          <div class="mono" id="payout12">–</div>
+        </div>
+        <div>
+          <div class="muted">Inversión total</div>
+          <div class="mono" id="inv12">100.00</div>
+        </div>
+        <div>
+          <div class="muted">Beneficio estimado</div>
+          <div class="mono" id="profit12">–</div>
+        </div>
+      </div>
+      <div class="right">
+        <small id="margin12"></small>
+      </div>
+    </div>
+
+    <div class="muted">Nota: si 1/oa + 1/ob < 1, hay arbitraje y el beneficio es positivo. Sin comisiones ni límites.</div>
+  </div>
+
   <script>
     const BANK = 100;
     const $ = (id) => document.getElementById(id);
@@ -95,6 +147,10 @@
 
     function resetProbabilities() {
       ['pa', 'px', 'pb'].forEach(id => setProbability(id, NaN));
+    }
+
+    function resetProbabilities12() {
+      ['pa12', 'pb12'].forEach(id => setProbability(id, NaN));
     }
 
     function calc() {
@@ -144,9 +200,54 @@
       $('result').style.display = '';
     }
 
+    function calc12() {
+      const oa = parseFloat($('oa12').value);
+      const ob = parseFloat($('ob12').value);
+
+      if (![oa, ob].every(v => v && v > 1)) {
+        resetProbabilities12();
+        $('result12').style.display = 'none';
+        return;
+      }
+
+      const invA = 1 / oa;
+      const invB = 1 / ob;
+      const invSum = invA + invB;
+      const margin = 1 - invSum;
+
+      setProbability('pa12', invA / invSum);
+      setProbability('pb12', invB / invSum);
+
+      let sA = BANK * invA / invSum;
+      let sB = BANK * invB / invSum;
+
+      sA = Math.round(sA * 100) / 100;
+      sB = Math.round(sB * 100) / 100;
+
+      const S = sA + sB;
+      const payoutTheo = BANK / invSum;
+      const payoutEst = Math.min(sA * oa, sB * ob);
+      const profitEst = payoutEst - S;
+
+      $('arbFlag12').innerHTML = margin > 0
+        ? `<span class="ok">Arbitraje SÍ</span> · margen ${(margin * 100).toFixed(2)}%`
+        : `<span class="bad">Arbitraje NO</span> · overround ${(invSum * 100).toFixed(2)}%`;
+
+      $('sa12').textContent = fmt(sA);
+      $('sb12').textContent = fmt(sB);
+      $('payout12').textContent = fmt(payoutTheo);
+      $('inv12').textContent = fmt(S);
+      $('profit12').textContent = fmt(profitEst);
+      $('margin12').textContent = `ROI teórico ≈ ${((1 / invSum - 1) * 100).toFixed(2)}%`;
+
+      $('result12').style.display = '';
+    }
+
     ['oa', 'ox', 'ob'].forEach(id => $(id).addEventListener('input', calc));
+    ['oa12', 'ob12'].forEach(id => $(id).addEventListener('input', calc12));
 
     calc();
+    calc12();
   </script>
 </body>
 </html>
