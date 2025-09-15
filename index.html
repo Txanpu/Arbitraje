@@ -8,7 +8,7 @@
     :root{--gap:12px;--radius:14px;font-family:system-ui,Segoe UI,Roboto,Arial,sans-serif}
     body{margin:0;padding:24px;background:#0b0e14;color:#e6e6e6}
     h1{font-size:20px;margin:0 0 12px}
-    .card{background:#111827;border:1px solid #2a2f3a;border-radius:var(--radius);padding:16px;max-width:760px}
+    .card{background:#111827;border:1px solid #2a2f3a;border-radius:var(--radius);padding:16px;max-width:760px;margin-bottom:24px}
     .grid{display:grid;gap:var(--gap)}
     .g3{grid-template-columns:repeat(3,1fr)}
     label{font-size:12px;opacity:.8}
@@ -82,10 +82,15 @@
     <div class="muted">Nota: si 1/oa + 1/ox + 1/ob < 1, hay arbitraje y el beneficio es positivo. Sin comisiones ni límites.</div>
   </div>
 
+  <div class="card" id="live">
+    <h2>Arbitrajes en directo</h2>
+    <div id="liveResults" class="grid" style="gap:var(--gap)"></div>
+  </div>
+
   <script>
     const BANK = 100;
     const $ = (id) => document.getElementById(id);
-    const fmt = (n) => isFinite(n) ? n.toFixed(2) : '—';
+    const fmt = (n) => isFinite(n) ? Number(n).toFixed(2) : '—';
 
     function calc(){
       const oa = parseFloat($('oa').value);
@@ -97,20 +102,17 @@
       const invSum = invA + invX + invB;
       const margin = 1 - invSum; // >0 si hay arbitraje
 
-      // Stakes que igualan payout con banca fija BANK
       let sA = BANK * invA / invSum;
       let sX = BANK * invX / invSum;
       let sB = BANK * invB / invSum;
 
-      // Redondeo a céntimos
       sA = Math.round(sA*100)/100;
       sX = Math.round(sX*100)/100;
       sB = Math.round(sB*100)/100;
 
-      // Recalcular totales y payout tras redondeo
       const S = sA + sX + sB;
-      const payoutTheo = BANK / invSum; // teórico sin redondeo
-      const payoutEst = Math.min(sA*oa, sX*ox, sB*ob); // conservador tras redondeo
+      const payoutTheo = BANK / invSum;
+      const payoutEst = Math.min(sA*oa, sX*ox, sB*ob);
       const profitEst = payoutEst - S;
 
       $('arbFlag').innerHTML = margin>0
@@ -129,6 +131,35 @@
     }
 
     ['oa','ox','ob'].forEach(id=>$(id).addEventListener('input',calc));
+
+    async function loadArbitrage(){
+      try {
+        const res = await fetch('/api/arbitrage');
+        const data = await res.json();
+        const container = $('liveResults');
+        if (!data.length) {
+          container.innerHTML = '<div class="muted">Sin oportunidades actualmente</div>';
+          return;
+        }
+        container.innerHTML = '';
+        data.forEach(o => {
+          const div = document.createElement('div');
+          div.className = 'box';
+          div.innerHTML = `
+            <div><b>${o.event}</b></div>
+            <div class="mono">A: ${o.best.home.price} (${o.best.home.bookie}) → apostar ${fmt(o.stake.home)}</div>
+            <div class="mono">X: ${o.best.draw.price} (${o.best.draw.bookie}) → apostar ${fmt(o.stake.draw)}</div>
+            <div class="mono">B: ${o.best.away.price} (${o.best.away.bookie}) → apostar ${fmt(o.stake.away)}</div>
+            <div class="muted mono">Beneficio estimado ${fmt(o.profit)} · ROI ${(o.margin*100).toFixed(2)}%</div>
+          `;
+          container.appendChild(div);
+        });
+      } catch (e) {
+        console.error('Error cargando arbitrajes', e);
+      }
+    }
+
+    loadArbitrage();
   </script>
 </body>
 </html>
