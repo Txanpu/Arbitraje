@@ -135,6 +135,143 @@
     <div class="muted">Nota: si 1/oa + 1/ob < 1, hay arbitraje y el beneficio es positivo. Sin comisiones ni límites.</div>
   </div>
 
+  <div class="card grid" id="app1xdc">
+    <h1>Arbitraje 1X2 ↔ Doble oportunidad</h1>
+    <div class="muted">Combina una apuesta simple con una doble oportunidad complementaria (1 + X2, X + 12, 2 + 1X).</div>
+
+    <div class="grid g3">
+      <div>
+        <label>Cuota 1 (solo)</label>
+        <input id="o1dc" type="number" step="0.01" min="1.01" placeholder="2.10">
+      </div>
+      <div>
+        <label>Cuota X (solo)</label>
+        <input id="oxdc" type="number" step="0.01" min="1.01" placeholder="3.30">
+      </div>
+      <div>
+        <label>Cuota 2 (solo)</label>
+        <input id="o2dc" type="number" step="0.01" min="1.01" placeholder="3.20">
+      </div>
+    </div>
+
+    <div class="grid g3">
+      <div>
+        <label>Cuota 1X (doble)</label>
+        <input id="o1xdc" type="number" step="0.01" min="1.01" placeholder="1.35">
+      </div>
+      <div>
+        <label>Cuota X2 (doble)</label>
+        <input id="ox2dc" type="number" step="0.01" min="1.01" placeholder="1.40">
+      </div>
+      <div>
+        <label>Cuota 12 (doble)</label>
+        <input id="o12dc" type="number" step="0.01" min="1.01" placeholder="1.35">
+      </div>
+    </div>
+
+    <div id="resultdc" class="grid" style="display:none">
+      <div class="muted">Resultados por combinación:</div>
+
+      <div class="combo" id="combo-1x2" style="display:none">
+        <div class="muted"><b>1</b> + <b>X2</b></div>
+        <div id="flag-1x2" class="mono"></div>
+        <div class="box grid g2">
+          <div>
+            <div class="muted">Apostar 1</div>
+            <div class="mono" id="stake-single-1x2">–</div>
+          </div>
+          <div>
+            <div class="muted">Apostar X2</div>
+            <div class="mono" id="stake-double-1x2">–</div>
+          </div>
+        </div>
+        <div class="grid g3">
+          <div>
+            <div class="muted">Payout igualado (teórico)</div>
+            <div class="mono" id="payout-1x2">–</div>
+          </div>
+          <div>
+            <div class="muted">Inversión total</div>
+            <div class="mono" id="inv-1x2">–</div>
+          </div>
+          <div>
+            <div class="muted">Beneficio estimado</div>
+            <div class="mono" id="profit-1x2">–</div>
+          </div>
+        </div>
+        <div class="right">
+          <small id="margin-1x2"></small>
+        </div>
+      </div>
+
+      <div class="combo" id="combo-x12" style="display:none">
+        <div class="muted"><b>X</b> + <b>12</b></div>
+        <div id="flag-x12" class="mono"></div>
+        <div class="box grid g2">
+          <div>
+            <div class="muted">Apostar X</div>
+            <div class="mono" id="stake-single-x12">–</div>
+          </div>
+          <div>
+            <div class="muted">Apostar 12</div>
+            <div class="mono" id="stake-double-x12">–</div>
+          </div>
+        </div>
+        <div class="grid g3">
+          <div>
+            <div class="muted">Payout igualado (teórico)</div>
+            <div class="mono" id="payout-x12">–</div>
+          </div>
+          <div>
+            <div class="muted">Inversión total</div>
+            <div class="mono" id="inv-x12">–</div>
+          </div>
+          <div>
+            <div class="muted">Beneficio estimado</div>
+            <div class="mono" id="profit-x12">–</div>
+          </div>
+        </div>
+        <div class="right">
+          <small id="margin-x12"></small>
+        </div>
+      </div>
+
+      <div class="combo" id="combo-21x" style="display:none">
+        <div class="muted"><b>2</b> + <b>1X</b></div>
+        <div id="flag-21x" class="mono"></div>
+        <div class="box grid g2">
+          <div>
+            <div class="muted">Apostar 2</div>
+            <div class="mono" id="stake-single-21x">–</div>
+          </div>
+          <div>
+            <div class="muted">Apostar 1X</div>
+            <div class="mono" id="stake-double-21x">–</div>
+          </div>
+        </div>
+        <div class="grid g3">
+          <div>
+            <div class="muted">Payout igualado (teórico)</div>
+            <div class="mono" id="payout-21x">–</div>
+          </div>
+          <div>
+            <div class="muted">Inversión total</div>
+            <div class="mono" id="inv-21x">–</div>
+          </div>
+          <div>
+            <div class="muted">Beneficio estimado</div>
+            <div class="mono" id="profit-21x">–</div>
+          </div>
+        </div>
+        <div class="right">
+          <small id="margin-21x"></small>
+        </div>
+      </div>
+    </div>
+
+    <div class="muted">Condición: 1/cuota simple + 1/cuota doble &lt; 1 ⇒ arbitraje con stake proporcional al inverso de cada cuota.</div>
+  </div>
+
   <script>
     const BANK = 100;
     const $ = (id) => document.getElementById(id);
@@ -243,11 +380,85 @@
       $('result12').style.display = '';
     }
 
+    function calc1xdc() {
+      const combos = [
+        {
+          key: '1x2',
+          singleId: 'o1dc',
+          doubleId: 'ox2dc',
+          singleLabel: '1',
+          doubleLabel: 'X2'
+        },
+        {
+          key: 'x12',
+          singleId: 'oxdc',
+          doubleId: 'o12dc',
+          singleLabel: 'X',
+          doubleLabel: '12'
+        },
+        {
+          key: '21x',
+          singleId: 'o2dc',
+          doubleId: 'o1xdc',
+          singleLabel: '2',
+          doubleLabel: '1X'
+        }
+      ];
+
+      let anyValid = false;
+
+      for (const combo of combos) {
+        const oSingle = parseFloat($(combo.singleId).value);
+        const oDouble = parseFloat($(combo.doubleId).value);
+
+        if (!(oSingle && oSingle > 1 && oDouble && oDouble > 1)) {
+          $(`combo-${combo.key}`).style.display = 'none';
+          continue;
+        }
+
+        anyValid = true;
+
+        const invSingle = 1 / oSingle;
+        const invDouble = 1 / oDouble;
+        const invSum = invSingle + invDouble;
+        const margin = 1 - invSum;
+
+        let stakeSingle = BANK * invSingle / invSum;
+        let stakeDouble = BANK * invDouble / invSum;
+
+        stakeSingle = Math.round(stakeSingle * 100) / 100;
+        stakeDouble = Math.round(stakeDouble * 100) / 100;
+
+        const totalStake = stakeSingle + stakeDouble;
+        const payoutSingle = stakeSingle * oSingle;
+        const payoutDouble = stakeDouble * oDouble;
+        const payoutTheo = BANK / invSum;
+        const profitEst = Math.min(payoutSingle, payoutDouble) - totalStake;
+
+        $(`flag-${combo.key}`).innerHTML = margin > 0
+          ? `<span class="ok">Arbitraje SÍ</span> · margen ${(margin * 100).toFixed(2)}%`
+          : `<span class="bad">Arbitraje NO</span> · overround ${(invSum * 100).toFixed(2)}%`;
+
+        $(`stake-single-${combo.key}`).textContent = fmt(stakeSingle);
+        $(`stake-double-${combo.key}`).textContent = fmt(stakeDouble);
+        $(`payout-${combo.key}`).textContent = fmt(payoutTheo);
+        $(`inv-${combo.key}`).textContent = fmt(totalStake);
+        $(`profit-${combo.key}`).textContent = fmt(profitEst);
+        $(`margin-${combo.key}`).textContent = `ROI teórico ≈ ${((1 / invSum - 1) * 100).toFixed(2)}%`;
+
+        $(`combo-${combo.key}`).style.display = '';
+      }
+
+      $('resultdc').style.display = anyValid ? '' : 'none';
+    }
+
     ['oa', 'ox', 'ob'].forEach(id => $(id).addEventListener('input', calc));
     ['oa12', 'ob12'].forEach(id => $(id).addEventListener('input', calc12));
+    ['o1dc', 'oxdc', 'o2dc', 'o1xdc', 'ox2dc', 'o12dc'].forEach(id => $(id).addEventListener('input', calc1xdc));
 
     calc();
     calc12();
+    calc1xdc();
   </script>
 </body>
 </html>
